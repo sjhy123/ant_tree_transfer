@@ -1,684 +1,734 @@
 <template>
- <div class="" style='width:1200px;margin:0 auto;'>
-     <a-row :gutter="20">
-         <a-col :span="6">
-             <div class="left-content">
-                 <h4 class="title">组件库</h4>
-                 <div id='left-defaults' style="min-height: 800px; background: #fff">
-                     <div class="left-component" drop="false" style="color:#999; padding-left: 20px">banner顶部</div>
-                     <div class="left-component" label="gongge"><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px;" src="/static/images/icon_tuodong@3x.svg" />宫格导航</div>
-                     <div class="left-component" label="picture"><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px; " src="/static/images/icon_tuodong@3x.svg" />图片导航</div>
-                     <div class="left-component" label="banner"><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px; " src="/static/images/icon_tuodong@3x.svg" />自定义banner</div>
-                     <div class="left-component" drop="false" >商品列表<i class="icon-show icon-show-right"></i></div>
-                     <div class="left-component t24" label="goods_pulldown" ><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px; " src="/static/images/icon_tuodong@3x.svg" />瀑布流</div>
-                     <div class="left-component t24" label="goods_leftright" ><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px;" src="/static/images/icon_tuodong@3x.svg" />左右滚动</div>
-                     <div class="left-component" label="tuan"><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px;" src="/static/images/icon_tuodong@3x.svg" />团购</div>
-                     <div class="left-component" label="skill"><img style="width:12px; vertical-align: -2px; opacity: 0.65;margin-right: 8px;" src="/static/images/icon_tuodong@3x.svg" />秒杀</div>
-                     <div class="left-component" drop="false" style="color:#999; padding-left: 20px">热门推荐</div>
-                 </div>
-             </div>
-         </a-col>
-         <a-col :span="18" class="center-content">
-                 <div id="right-defaults" style="min-height:400px;">
-                     <div
-                             v-for="(items,index) in componentList"
-                             v-if="items.componentName=='gongge'"
-                             :time="items.time"
-                             :order="items.order"
-                             :class="['component-list gongge-component validationEngineContainer','validationEngineContainer'+items.time]"
-                     >
+    <div style='width:900px;margin:0 auto;'>
+        <a-row>
+            <a-col :span="8">
+                <div class="tree-transfer-list">
+                    <div class="tree-transfer-header">
+                        <label class="">
+                                        <span class="">
+                                           <a-checkbox
+                                                   :indeterminate="indeterminate"
+                                                   @change="onCheckAllChange"
+                                                   :checked="checkedAll"
+                                           />
+                                        </span>
+                        </label>
+                        <span class="ant-transfer-list-header-selected"><span>全选</span><span
+                                class="ant-transfer-list-header-title"></span></span>
+                    </div>
+                    <div class="">
+                        <div class="tree-transfer-search">
+                            <a-input v-model="keywords" @keyup="filterTreeData" placeholder="请输入搜索内容"/>
+                        </div>
+                        <ul class="ant-transfer-list-content">
+                            <li v-for="(item,index) in treeData">
+                                <a-checkbox
+                                        :indeterminate="item.indeterminate"
+                                        :checked="item.checked"
+                                        @change="onCheckChange(item,'left')"/>
+                                <span class="checkSpan" @click="toggleUp(item)">{{item.title}}<a-icon
+                                        :type="item.isShow?'down':'right'"/></span>
+                                <ul v-if="item.isShow" class="tree-child-ul" v-for="(child,index) in item.children">
+                                    <li>
+                                        <a-checkbox @change="childCheckChange(child,item,'left')"
+                                                    :checked="child.checked">{{child.title}}
+                                        </a-checkbox>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </a-col>
+            <a-col class='center_row' :span="2">
+                <div style="text-align: center;">
+                    <div>
+                        <a-button type="primary" @click="setRightTree" size="small" :disabled="leftRow"
+                                  icon="right"></a-button>
+                    </div>
+                    <div style='margin-top:20px;'>
+                        <a-button type="primary" @click="setLeftTree" size="small" :disabled="rightRow"
+                                  icon="left"></a-button>
+                    </div>
+                </div>
+            </a-col>
 
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、宫格导航<i
-                                     :class="['icon-show',{'icon-show-down':items.showCon}]"></i>
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                         <div class="component-body" v-show="items.showCon">
-                             <!---->
-                             <gongge-component  :classifyLists="classifyLists" :jointList="jointList" :data='items' @ok='ok'></gongge-component>
-                         </div>
-
-                     </div>
-
-                     <div v-else-if="items.componentName=='picture'"
-                          :time="items.time"
-                          :order="items.order"
-                          :class="['component-list picture-component validationEngineContainer','validationEngineContainer'+items.time]"
-                     >
-
-
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、图片导航<i
-                                     :class="['icon-show',{'icon-show-down':items.showCon}]"></i>
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                         <div class="component-body" v-show="items.showCon">
-                             <picture-component :classifyLists="classifyLists" :jointList="jointList" :data='items' @ok='ok'/>
-                         </div>
-                     </div>
-
-                     <div v-else-if="items.componentName=='banner'"
-                          :class="['component-list banner-component validationEngineContainer','validationEngineContainer'+items.time]"
-                          :time="items.time"
-                          :order="items.order"
-                     >
-
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、自定义banner<i
-                                     :class="['icon-show',{'icon-show-down':items.showCon}]"></i>
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                         <div class="component-body" v-show="items.showCon">
-                             <banner-component :classifyLists="classifyLists" :jointList="jointList" :data='items' @update='initSwiper'/>
-                         </div>
-                     </div>
-
-                     <div v-else-if="items.componentName=='skill'"
-                          :class="['component-list skill-component validationEngineContainer','validationEngineContainer'+items.time]"
-                          :time="items.time"
-                          :order="items.order"
-                     >
-
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、秒杀
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                     </div>
-
-                     <div v-else-if="items.componentName=='tuan'"
-                          :class="['component-list tuan-component validationEngineContainer','validationEngineContainer'+items.time]"
-                          :time="items.time"
-                          :order="items.order"
-                     >
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、团购
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                     </div>
-
-                     <div v-else-if="items.componentName=='goods_pulldown'"
-                          :class="['component-list goods_pulldown-component validationEngineContainer','validationEngineContainer'+items.time]"
-                          :time="items.time"
-                          :order="items.order"
-                     >
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、商品列表(瀑布流)<i
-                                     :class="['icon-show',{'icon-show-down':items.showCon}]"></i>
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                         <div class="component-body" v-show="items.showCon">
-                             <pull-down-component :classifyLists="classifyLists" :jointList="jointList" :data='items' @ok='ok'/>
-                         </div>
-                     </div>
-
-                     <div v-else-if="items.componentName=='goods_leftright'"
-                          :class="['component-list goods_leftright-component validationEngineContainer','validationEngineContainer'+items.time]"
-                          :time="items.time"
-                          :order="items.order"
-                     >
-                         <div class="head clearfix">
-                             <div style="cursor: pointer" @click="toggleShow(items)"
-                                  class="pull-left">{{items.order+1}}、商品列表(左右滚动)<i
-                                     :class="['icon-show',{'icon-show-down':items.showCon}]"></i>
-                             </div>
-                             <div class="pull-right">
-                                 <i @click="changeIndexShow(items)"
-                                    :class="['web-font fa fa-eye view-detail',{grayColor:!items.indexShow}] "></i>
-                                 <i @click="delComponent(items)" class="web-font fa fa-trash "></i>
-                             </div>
-                         </div>
-                         <div class="component-body" v-show="items.showCon">
-                             <left-right-component  :classifyLists="classifyLists" :jointList="jointList" :data='items' @ok='ok'/>
-                         </div>
-                     </div>
-             </div>
-         </a-col>
-     </a-row>
- </div>
+            <a-col :span="8">
+                <div class="tree-transfer-list">
+                    <div class="tree-transfer-header">
+                        <label class="">
+                                        <span class="">
+                                           <a-checkbox
+                                                   :indeterminate="rightIndeterminate"
+                                                   @change="rightCheckAllChange"
+                                                   :checked="rightCheckedAll"
+                                           />
+                                        </span>
+                        </label>
+                        <span class="ant-transfer-list-header-selected"><span>全选</span><span
+                                class="ant-transfer-list-header-title"></span></span>
+                    </div>
+                    <div class="">
+                        <div class="tree-transfer-search">
+                            <a-input v-model="rightKeywords" @keyup="filterRightTreeData" placeholder="请输入搜索内容"/>
+                        </div>
+                        <ul class="ant-transfer-list-content">
+                            <li v-for="(item,index) in rightTreeData">
+                                <a-checkbox
+                                        :indeterminate="item.indeterminate"
+                                        :checked="item.checked"
+                                        @change="onCheckChange(item,'right')"/>
+                                <span class="checkSpan" @click="toggleUp(item)">{{item.title}}<a-icon
+                                        :type="item.isShow?'down':'right'"/></span>
+                                <ul v-if="item.isShow" class="tree-child-ul" v-for="(child,index) in item.children">
+                                    <li>
+                                        <a-checkbox @change="childCheckChange(child,item,'right')"
+                                                    :checked="child.checked">{{child.title}}
+                                        </a-checkbox>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </a-col>
+        </a-row>
+    </div>
 </template>
+
 <script>
-import gonggeComponent from '../components/gonggeComponent'
-import pictureComponent from '../components/pictureComponent'
-import bannerComponent    from '../components/bannerComponent'
-import leftRightComponent    from '../components/leftRightComponent'
-import pullDownComponent    from '../components/pullDownComponent'
-import dragula  from 'dragula'
-
-export default {
-	  name: 'index',
-      components:{
-        gonggeComponent,
-        pictureComponent,
-        bannerComponent,
-        leftRightComponent,
-        pullDownComponent
+	
+  var 	sourceData=[{
+    title: 'Node1',
+    value: '0-0',
+    key: '0-0',
+    checked:false,
+    indeterminate:false,
+    children: [{
+      title: 'Child Node1',
+      value: '0-0-0',
+      key: '0-0-0',
+      checked:false,
+    }],
+  }, {
+    title: 'Node2',
+    value: '0-1',
+    key: '0-1',
+    checked:false,
+    indeterminate:false,
+    children: [{
+      title: 'Child Node3',
+      value: '0-1-0',
+      key: '0-1-0',
+      checked:false,
+      disabled: true,
+    }, {
+      title: 'Child Node4',
+      value: '0-1-1',
+      key: '0-1-1',
+      checked:false,
+    }, {
+      title: 'Child Node5',
+      value: '0-1-2',
+      checked:false,
+      key: '0-1-2',
+    }],
+  }]
+  export default {
+    name: 'treeTransfer',
+    components: {},
+    data () {
+      return {
+        routeName: '',
+        form: this.$form.createForm(this),
+        postData: {},
+        mockData: [],
+        targetKeys: [],
+        keywords: '',
+        rightKeywords: '',
+        leftData: [],
+        treeData: sourceData,
+        rightTreeData: [],
+        rightData: [],
+        indeterminate: false,
+        checkedAll: false,
+        leftRow: true,
+        rightIndeterminate: false,
+        rightCheckedAll: false,
+        rightRow: true
+      }
+    },
+    watch: {
+      $route: {
+        handler: function (route) {
+          this.routeName = route.name
+        },
+        immediate: true
+      }
+    },
+    filters: {
+      statusFilter (type) {
+        return statusMap[type].text
       },
-  data(){
-	    return {
-          test:1,
-          module_type:0,//0系统模板，1社区模板
-          mid:0,//0系统模板，1社区模板
-          copy_id:1,
-          module_name:"",
-          village_id:"",
-          componentList: [
-            {
-              componentName: 'hotGoods',
-              indexShow: true,
-              order: 999
-            }],
-          classifyLists:[],
-          jointList:[],
-          provinceList: [],
-          cityList: [],
-          checkedPro: {
-            province_id: '',
-            province_name: ''
-          },
-          checkedCity: {
-            cityID: '',
-            name: ''
-          },
-          checkedVillage:[]
+      statusTypeFilter (type) {
+        return statusMap[type].status
+      }
+    },
+    created () {
+
+    },
+    mounted () {
+
+      this.leftData = this.treeData
+    },
+    methods: {
+      handleSubmit () {
+
+      },
+      goBack () {
+        history.go(-1)
+      },
+      toggleUp (item) {
+        if (!item.isShow) {
+          this.$set(item, 'isShow', false)
         }
-  },
-  mounted: function () {
-    this.init();
+        item.isShow = !item.isShow
+      },
+      rightCheckAllChange () {//右边全选
+        if (this.rightCheckedAll) {
+          this.rightCheckedAll = false
+          this.rightIndeterminate = false
+          this.rightRow = true
+          this.rightTreeData.forEach(row => {
+            row.checked = false
+            row.indeterminate = false
+            if (row.children) {
+              row.children.forEach(child => {
+                child.checked = false
+              })
+            }
+          })
 
-  },
-  methods: {
+        } else {
+          this.rightCheckedAll = true
+          this.rightIndeterminate = false
+          this.rightRow = false
+          this.rightTreeData.forEach(row => {
+            row.checked = true
+            row.indeterminate = false
+            if (row.children) {
+              row.children.forEach(child => {
+                child.checked = true
+              })
+            }
+          })
+        }
+        // this.setIndeterminate('right');
+      },
+      onCheckAllChange () {//全选
+        if (this.checkedAll) {
+          this.checkedAll = false
+          this.indeterminate = false
+          this.leftRow = true
+          this.treeData.forEach(row => {
+            row.checked = false
+            row.indeterminate = false
+            if (row.children) {
+              row.children.forEach(child => {
+                child.checked = false
+              })
+            }
+          })
 
-    toggleShow: function (items) {
-      items.showCon = !items.showCon
-    },
+        } else {
+          this.checkedAll = true
+          this.indeterminate = false
+          this.leftRow = false
+          this.treeData.forEach(row => {
+            row.checked = true
+            row.indeterminate = false
+            if (row.children) {
+              row.children.forEach(child => {
+                child.checked = true
+              })
+            }
+          })
+        }
+        console.log(this.treeData)
+        //  this.setIndeterminate('left');
+      },
+      onCheckChange (item, flag) {//父选
 
-    ok: function (data) {
-      this.data = data;
-    },
-
-    init: function () {
-      var _this = this;
-      var right = document.getElementById('right-defaults')
-      //var left=document.getElementById('left-defaults')
-      var left = document.getElementById('left-defaults')
-      var drake = dragula([left, right], {
-        isContainer: function (el) {
-          return false;
-          // only elements in drake.containers will be taken into account
-        },
-        moves: function (el, source, handle, sibling) {
-          //&&$(handle).parents('.content').attr('drop')!='false'
-          return el.getAttribute('drop') != "false";
-          // return el.getAttribute('drop')!="false"&&$(handle).parents('.content').attr('drop')!='false'; // elements are always draggable by default
-        },
-        accepts: function (el, target, source, sibling) {
-          return target != left; // elements can be dropped in any of the `containers` by default
-        },
-        invalid: function (el, handle) {
-
-          return false; // don't prevent any drags from initiating by default
-        },
-        direction: 'vertical',             // Y axis is considered when determining where an element would be dropped
-        copy: function (el, source) {
-          return source === left
-        },                       // elements are moved by default, not copied
-        copySortSource: false,             // elements in copy-source containers can be reordered
-        revertOnSpill: false,              // spilling will put the element back where it was dragged from, if this is true
-        removeOnSpill: false,              // spilling will `.remove` the element, if this is true
-        mirrorContainer: document.body,    // set the element that gets mirror elements appended
-        ignoreInputTextSelection: true     // allows users to select input text, see details below
-      }).on('dragend',function(){
-        drake.remove();
-      }).on('drag', function (el) {
-
-
-      }).on('drop', function (el, target, source, sibling) {
-        var label = el.getAttribute('label');
-
-        if (source.getAttribute('id') == 'left-defaults' && target == right) {
-          var order =Array.prototype.indexOf.call(el.parentNode.children, el);
-         // var order = $(el).index($(this).parent().parent()[0]);
-          //匹配标签，并且从左边拉动
-
-          drake.remove();
-
-          switch (label) {
-            case 'gongge':
-              _this.componentList.push({
-                componentName: 'gongge',
-                order: order,
-                showCon: true,//显示内容,
-                indexShow: true,
-                time: new Date().getTime(),
-                use: '',
-                line: '1',
-                showDesc: '1',
-                showIcon: '1',
-                picList: [{
-                  icon_image: '',
-                  icon_desc: '',
-                  icon_type: '1',//1商品分类，2商品组合，3秒杀商品，4团购商品，5优惠券，6链接
-                  icon_corn: '',
-                  icon_sort: '0',
-                  classify_id:'',
-                  joint_id:"",
-                  link_url:''
-                }]
-              });
-              break;
-            case 'picture':
-              _this.componentList.push({
-                componentName: 'picture',
-                order: order,
-                showCon: true,//显示内容
-                indexShow: true,
-                time: new Date().getTime(),
-                picType: [],
-                listPic: {
-                  2: [{pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}, {pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}],
-                  3: [{pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}, {pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}, {pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}],
-                  4: [{pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}, {pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}, {pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}, {pic_type: "1",pic_image:'',classify_id:'',joint_id:"",link_url:""}]
+        if (item.checked) {
+          this.$set(item, 'checked', false)
+          this.$set(item, 'indeterminate', false)
+          if (flag == 'left') {
+            this.leftData.forEach(row => {
+              if (row.title == item.title) {
+                this.$set(row, 'checked', false)
+                this.$set(row, 'indeterminate', false)
+                this.leftRow = true
+                if (row.children) {
+                  row.children.forEach(child => {
+                    this.$set(child, 'checked', false)
+                  })
                 }
-              })
-              break;
-            case 'banner':
-              _this.componentList.push({
-                componentName: 'banner',
-                order: order,
-                showCon: true,//显示内容
-                indexShow: true,
-                time: new Date().getTime(),
-                use: '',
-                type: "1",
-                speed: '3',
-                picList: [{
-                  pic_desc: '',
-                  pic_type: '1',
-                  classify_id:'',
-                  joint_id:'',
-                  link_url:'',
-                  pic_image:''
-                }]
-              })
-              break;
-            case 'goods_pulldown':
-              _this.componentList.push({
-                componentName: 'goods_pulldown',
-                order: order,
-                showCon: true,//显示内容
-                indexShow: true,
-                time: new Date().getTime(),
-                use: '',
-                main_title: '',
-                second_titile: '',
-                line_type: '2',
-                limit_num: '3',
-                showMore: "1",
-                goods_type: '1',//1商品分类，2商品组合
-                classify_id:'',
-                joint_id:'',
-              })
-              break;
-            case 'goods_leftright':
-              _this.componentList.push({
-                componentName: 'goods_leftright',
-                order: order,
-                showCon: true,//显示内容
-                indexShow: true,
-                time: new Date().getTime(),
-                use: '',
-                main_title: '',
-                second_titile: '',
-                limit_num: '3',
-                showMore: '1',
-                goods_type: '1',//1商品分类，2商品组合
-                classify_id:'',
-                joint_id:'',
-                bg_image:''
-              })
-              break;
-            case 'tuan':
-              _this.componentList.push({
-                componentName: 'tuan',
-                indexShow: true,
-                order: order,
-                time: new Date().getTime(),
-              })
-              break;
-            case 'skill':
-              _this.componentList.push({
-                componentName: 'skill',
-                order: order,
-                indexShow: true,
-                time: new Date().getTime(),
-              })
-              break;
+              }
+            })
+          } else {
+            this.rightData.forEach(row => {
+              if (row.title == item.title) {
+                this.$set(row, 'checked', false)
+                this.$set(row, 'indeterminate', false)
+                this.rightRow = true
+                if (row.children) {
+                  row.children.forEach(child => {
+                    this.$set(child, 'checked', false)
+                  })
+                }
+              }
+            })
           }
 
-          _this.componentList.sort(function(a,b){
-            if(parseInt(a.order)===parseInt(b.order)){
-              return  parseInt(b.time)-parseInt(a.time)
-            }
-            return parseInt(a.order)-parseInt(b.order)
-          });
-          _this.componentList.forEach(function(row,i){
-            if(row.componentName!="hotGoods")
-              row.order=i;
-          })
-          _this.resetOrder()
-        }
-
-        if (source.getAttribute('id') == 'right-defaults') {
-          _this.resetOrder()
-        }
-      })
-    },
-    subData: function () {
-      this.componentList.forEach(function (row) {
-        if (row.componentName == "gongge") {
-          row.picList = row.picList.sort(function (a, b) {
-            return parseInt(b.icon_sort, 10) - parseInt(a.icon_sort, 10)
-          })
-        }
-      });
-
-      var url="";
-
-      var params={
-        module_type:this.module_type,
-        module_name:this.module_name,
-        village_id:$("#select_village").val(),
-        content:JSON.stringify(this.componentList),
-        getVillageByCityID:1
-      };
-      if(this.mid){
-        url="/backend/yard/edit";
-        params.mid=this.mid;
-      }else{
-        url="/backend/yard/add"
-      }
-      this.$http.post(url, params, {
-        emulateJSON: true,
-        emulateHTTP: true,
-        credentials: true
-      }).then(function (res) {
-        if (res.data.success == true) {
-          layer.msg(res.data.msg,{
-            time:1000,
-            end:function(){
-              window.location.href="/backend/yard/lists";
-            }
-          })
         } else {
-          layer.msg(res.data.msg)
+          this.$set(item, 'checked', true)
+          this.$set(item, 'indeterminate', false)
+          if (flag == 'left') {
+            this.leftData.forEach(row => {
+              if (row.title == item.title) {
+                this.$set(row, 'checked', true)
+                this.$set(row, 'indeterminate', false)
+                this.leftRow = false
+                if (row.children) {
+                  row.children.forEach(child => {
+                    this.$set(child, 'checked', true)
+                  })
+                }
+              }
+            })
+          } else {
+            this.rightData.forEach(row => {
+              if (row.title == item.title) {
+                this.$set(row, 'checked', true)
+                this.$set(row, 'indeterminate', false)
+                this.rightRow = false
+                if (row.children) {
+                  row.children.forEach(child => {
+                    this.$set(child, 'checked', true)
+                  })
+                }
+              }
+            })
+          }
+
         }
-      })
-    },
-    delComponent: function (item) {
-      var _index = this.componentList.indexOf(item);
-      this.componentList.splice(_index, 1);
+        this.setIndeterminate(flag)
+      },
+      childCheckChange (child, parent, flag) {
+        if (child.checked) {
+          this.$set(child, 'checked', false)
+        } else {
+          this.$set(child, 'checked', true)
+        }
+        //设置中间态
+        var checkedList = []
+        var children = []
 
-      this.resetOrder()//重置排序
-    },
-    changeIndexShow: function (item) {
+        if (flag == 'left') {
+          this.leftData.forEach(row => {
+            if (row.title == parent.title) {
+              children = row.children
+              row.children.forEach(childRow => {
+                if (childRow.title == child.title) {
+                  childRow.checked = child.checked
+                }
+                if (childRow.checked) {
+                  checkedList.push(childRow)
+                }
+              })
+              return
+            }
+          })
 
-      if (!item.indexShow) {
-        this.$set(item, 'indexShow', true)
-        return;
-      }
-      item.indexShow = !item.indexShow;
-    },
-    resetOrder:function(){
-      var _this=this;
-      setTimeout(function () {
-       var componentList= document.querySelectorAll('.component-list')
-        for(var i=0; i<componentList.length;i++){
-         var time= componentList[i].getAttribute('time');
-          _this.componentList.forEach(function (row) {
-            if (row.time == time) {
-              row.order = i;
+          this.$set(parent, 'indeterminate', !!checkedList.length && (checkedList.length < children.length))
+          this.$set(parent, 'checked', checkedList.length == children.length)
+
+          var _this = this
+          this.leftData.forEach(row => {
+            if (row.title == parent.title) {
+              _this.$set(row, 'checked', parent.checked)
+              _this.$set(row, 'indeterminate', parent.indeterminate)
+
+              return
+            }
+          })
+
+        } else {
+
+          this.rightData.forEach(row => {
+            if (row.title == parent.title) {
+              children = row.children
+              row.children.forEach(childRow => {
+                if (childRow.title == child.title) {
+                  childRow.checked = child.checked
+                }
+                if (childRow.checked) {
+                  checkedList.push(childRow)
+                }
+              })
+              return
+            }
+          })
+
+          this.$set(parent, 'indeterminate', !!checkedList.length && (checkedList.length < children.length))
+          this.$set(parent, 'checked', checkedList.length == children.length)
+
+          var _this = this
+          this.rightData.forEach(row => {
+            if (row.title == parent.title) {
+              _this.$set(row, 'checked', parent.checked)
+              _this.$set(row, 'indeterminate', parent.indeterminate)
+
+              return
             }
           })
         }
-      }, 0)
-    },
-    initSwiper:function(){
-      this.componentList.forEach(function(row){
-        if(row.componentName=='banner'&&row.type==2&row.picList.length>1){
-          setTimeout(function(){
-            new Swiper('#swiper-banner', {
-              loop: false,
-              autoplay: {
-                delay: parseInt(row.speed)*1000,
-                disableOnInteraction: false,
-              },
-              preventClicks: false,
-              pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-              },
-              onInit: function (swiper) {
-              },
-              onSlideChangeEnd: function (swiper) {
-              }
-            });
-          },0)
+        this.setIndeterminate(flag)
+      },
+      setIndeterminate (flag) {
+        //设置中间态
 
+        var checkedList = []
+        var indeterminateList = []
+
+        if (flag == 'left') {
+          var plainOptions = this.treeData
+          if (plainOptions.length == 0) {
+            this.leftRow = true
+            this.checkedAll = false
+            this.indeterminateList = false
+            return
+          }
+
+          this.treeData.forEach(row => {
+            if (row.checked) {
+              checkedList.push(row)
+            }
+            if (row.indeterminate) {
+              indeterminateList.push(row)
+            }
+          })
+          this.indeterminate = !!indeterminateList.length || !!checkedList.length && (checkedList.length < plainOptions.length)
+          this.checkedAll = checkedList.length == plainOptions.length
+
+          if (this.indeterminate || this.checkedAll) {
+            this.leftRow = false
+          } else {
+            this.leftRow = true
+          }
+
+        } else {
+          var plainOptions = this.rightTreeData
+          if (plainOptions.length == 0) {
+            this.rightRow = true
+            this.rightCheckedAll = false
+            this.rightIndeterminateList = false
+            return
+          }
+
+          this.rightTreeData.forEach(row => {
+            if (row.checked) {
+              checkedList.push(row)
+            }
+            if (row.indeterminate) {
+              indeterminateList.push(row)
+            }
+          })
+          this.rightIndeterminate = !!indeterminateList.length || !!checkedList.length && (checkedList.length < plainOptions.length)
+          this.rightCheckedAll = checkedList.length == plainOptions.length
+
+          if (this.rightIndeterminate || this.rightCheckedAll) {
+            this.rightRow = false
+          } else {
+            this.rightRow = true
+          }
         }
-      })
+      },
+      filterRightTreeData () {//过滤右边搜索
+        var keywords = this.rightKeywords
+        var searchArr = []
+        if (!keywords) {
+          this.rightTreeData = this.rightData
+          return
+        }
+        this.rightTreeData.forEach(row => {
+          if (row.children) {
+            var obj = JSON.parse(JSON.stringify(row))
+            obj.children = []
+            row.children.forEach(child => {
+              if (child.title.indexOf(keywords) != -1) {
+                obj.children.push(child)
+              }
+            })
+            if (obj.children.length > 0) {
+              searchArr.push(obj)
+            }
+          }
+        })
+        this.rightTreeData = searchArr
+      },
+      filterTreeData () {//过滤左边搜索
+        var keywords = this.keywords
+        var searchArr = []
+        if (!keywords) {
+          this.treeData = this.leftData
+          return
+        }
+        this.treeData.forEach(row => {
+          if (row.children) {
+            var obj = JSON.parse(JSON.stringify(row))
+            obj.children = []
+            row.children.forEach(child => {
+              if (child.title.indexOf(keywords) != -1) {
+                obj.children.push(child)
+              }
+            })
+            if (obj.children.length > 0) {
+              searchArr.push(obj)
+            }
+          }
+        })
+        this.treeData = searchArr
+
+      },
+      setRightTree () {//设置右边树
+        var rightTree = this.rightTreeData
+        var newLeftTree = []
+        this.leftData.forEach((row, i) => {
+          if (row.checked) {
+            var isOn = rightTree.filter(rightRow => {
+              return rightRow.title == row.title
+            })
+            if (isOn.length == 0) {
+              var tempObj = row
+              tempObj.checked = false
+              tempObj.isShow = true
+              tempObj.children.forEach(tem => {
+                tem.checked = false
+              })
+              rightTree.push(tempObj)
+            } else {
+              rightTree.forEach(rightRow => {
+                if (rightRow.title == row.title) {
+                  row.children.forEach(child => {
+                    if (child.checked) {
+                      var tempObj = JSON.parse(JSON.stringify(child))
+                      tempObj.checked = false
+                      rightRow.children.push(tempObj)
+                    }
+                  })
+                }
+              })
+            }
+
+          } else if (row.indeterminate && row.children) {
+
+            var isOn = rightTree.filter(rightRow => {
+              return rightRow.title == row.title
+            })
+
+            if (isOn.length == 0) {
+
+              var rightObj = JSON.parse(JSON.stringify(row))
+              rightObj.children = []
+              rightObj.indeterminate = false
+              row.children.forEach(child => {
+                if (child.checked) {
+                  var tempObj = JSON.parse(JSON.stringify(child))
+                  tempObj.checked = false
+                  rightObj.children.push(tempObj)
+                }
+              })
+
+              if (rightObj.children.length > 0) {
+                rightObj.checked = false
+                rightObj.isShow = true
+                rightTree.push(rightObj)
+              }
+            } else {
+              rightTree.forEach(rightRow => {
+                if (rightRow.title == row.title) {
+                  row.children.forEach(child => {
+                    if (child.checked) {
+                      var tempObj = JSON.parse(JSON.stringify(child))
+                      tempObj.checked = false
+                      rightRow.children.push(tempObj)
+                    }
+                  })
+                }
+              })
+
+            }
+            var filterRow = row.children.filter(row => {
+              return !row.checked
+            })
+
+            if (filterRow.length > 0) {
+              var obj = {}
+              obj.title = row.title
+              obj.value = row.value
+              obj.key = row.key
+              obj.checked = row.checked
+              obj.isShow = row.isShow
+              obj.children = filterRow
+              newLeftTree.push(obj)
+            }
+          } else {
+            newLeftTree.push(row)
+          }
+        })
+        this.treeData = newLeftTree
+        this.leftData = newLeftTree
+        this.rightTreeData = this.rightData = rightTree
+        this.filterTreeData()
+        this.setIndeterminate('left')
+
+      },
+      setLeftTree () {//设置左边树
+        var leftTree = this.treeData
+        var newRightTree = []
+        this.rightData.forEach((row, i) => {
+          if (row.checked) {
+            var isOn = leftTree.filter(leftRow => {
+              return leftRow.title == row.title
+            })
+            if (isOn.length == 0) {
+              var tempObj = row
+              tempObj.checked = false
+              tempObj.isShow = true
+              tempObj.children.forEach(tem => {
+                tem.checked = false
+              })
+              leftTree.push(tempObj)
+            } else {
+              leftTree.forEach(leftRow => {
+                if (leftRow.title == row.title) {
+                  row.children.forEach(child => {
+                    if (child.checked) {
+                      var tempObj = JSON.parse(JSON.stringify(child))
+                      tempObj.checked = false
+                      leftRow.children.push(tempObj)
+                    }
+                  })
+                }
+              })
+            }
+
+          } else if (row.indeterminate && row.children) {
+
+            var isOn = leftTree.filter(leftRow => {
+              return leftRow.title == row.title
+            })
+
+            if (isOn.length == 0) {
+              var leftObj = JSON.parse(JSON.stringify(row))
+              leftObj.children = []
+              leftObj.indeterminate = false
+              row.children.forEach(child => {
+                if (child.checked) {
+                  var tempObj = JSON.parse(JSON.stringify(child))
+                  tempObj.checked = false
+                  leftObj.children.push(tempObj)
+                }
+              })
+
+              if (leftObj.children.length > 0) {
+                leftObj.checked = false
+                leftObj.isShow = true
+                leftTree.push(leftObj)
+              }
+            } else {
+              leftTree.forEach(leftRow => {
+                if (leftRow.title == row.title) {
+                  row.children.forEach(child => {
+                    if (child.checked) {
+                      var tempObj = JSON.parse(JSON.stringify(child))
+                      tempObj.checked = false
+                      leftRow.children.push(tempObj)
+                    }
+                  })
+                }
+              })
+
+            }
+            var filterRow = row.children.filter(row => {
+              return !row.checked
+            })
+
+            if (filterRow.length > 0) {
+              var obj = {}
+              obj.title = row.title
+              obj.value = row.value
+              obj.key = row.key
+              obj.checked = row.checked
+              obj.isShow = row.isShow
+              obj.children = filterRow
+              newRightTree.push(obj)
+            }
+          } else {
+            newRightTree.push(row)
+          }
+        })
+        this.rightTreeData = newRightTree
+        this.rightData = newRightTree
+        this.treeData = this.leftData = leftTree
+        this.filterRightTreeData()
+        this.setIndeterminate('right')
+      }
     }
-  },
-  directives:{
-
   }
-	}
 </script>
+<style type="text/css" scoped>
+	.center_row{
+		height:490px;
+		display:flex;
+		justify-content:center;
+		align-items:center;
+	}	
+    .tree-transfer-list {
+        border: 1px solid #eee;
+        border-radius: 5px;
+    }
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+    .tree-transfer-list .checkSpan {
+        cursor: pointer;
+    }
 
-#left-defaults ::selection
-{
-	background-color:#fff
-}
-#right-defaults {
-	/* display: flex;
-	 flex-direction: column;*/
-}
-img{
-	width: 100%;
-}
+    .tree-transfer-header {
+        padding: 10px 10px;
+        border-bottom: 1px solid #eee;
+    }
 
-.mt20 {
-	margin-top: 20px;
-}
-.left-component.gu-mirror{
-	background: #14C9CC;
-	color: #fff;
-	text-align: center;
-	cursor: pointer;
-	line-height: 35px;
-}
-.left-component.gu-transit{
-   border:1px dashed #000;
-	color: #000;
-	text-align: center;
-	cursor: pointer;
-	line-height: 35px;
-	margin-bottom: 15px;
-}
-.icon-show {
-	display: inline-block;
-	width: 15px;
-	height: 16px;
-	vertical-align: middle;
-	cursor: pointer;
-	background: url(/static/club/images/base.png) no-repeat scroll 5px -211px;
-}
+    .tree-transfer-search {
+        padding: 8px 10px;
+    }
 
-.icon-show-down {
-	background: url(/static/club/images/base.png) no-repeat scroll 3px -231px;
-}
+    .ant-transfer-list-content {
+        height: 400px;
+        overflow-y: auto;
+		padding:0 10px;
+    }
 
-.left-content.fixed{
-	position: fixed;
-	top: 0;
-	width: 170px;
-}
-.left-content .title {
-	height: 54px;
-	text-indent: 15px;
-	background: #eee;
-	color: #333;
-	margin: 0;
-	padding: 0;
-	line-height:54px;
-	font-size: 16px;
-}
+    .ant-transfer-list-content > li {
+		line-height:35px;
+    }
 
-.left-content #left-defaults {
-	list-style: none;
-}
-
-.left-content #left-defaults > div {
-	font-size: 14px;
-	line-height: 40px;
-	background: #fff;
-
-	text-indent: 12px;
-	cursor: pointer;
-	list-style: none;
-}
-
-.left-content #left-defaults > div:active {
-
-}
-
-.left-content #left-defaults > div.t24 {
-	text-indent: 24px;
-}
-
-.center-content .top_title {
-	padding: 10px 0;
-	background: #eee;
-}
-
-.component-list {
-	border: 1px solid #eee;
-	margin-bottom: 15px;
-}
-
-.component-list .head {
-	padding: 8px 10px;
-	font-size: 14px;
-	cursor:pointer;
-}
-
-.component-list .component-content {
-	padding: 20px;
-}
-
-.component-list .component-content .title {
-	font-size: 14px;
-	font-weight: bold;
-	color: #333;
-}
-
-.component-body {
-	border-top: 1px solid #eee;
-}
-
-.component-body .content {
-
-}
-
-.component-body .component-content .left-label {
-	float: left;
-	width: 65px;
-	text-align: left;
-}
-
-.component-list .list-con {
-	border: 1px solid #eee;
-	margin-top: 10px;
-	padding: 20px;
-}
-
-.component-list .list-con .items {
-	border-bottom: 1px solid #eee;
-	margin-bottom: 10px;
-	position: relative;
-}
-
-.component-list .upload-con {
-	width: 80px;
-	height: 80px;
-	background: #eee;
-	background: url("/static/images/shangchuan@2x.png");
-	background-size: contain;
-	text-align: center;
-	position: relative;
-	overflow: hidden;
-}
-
-.upload-con input[type="file"] {
-	width: 100%;
-	height: 100%;
-	opacity: 0;
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	z-index: 100;
-}
-
-.component-list .upload-con span {
-        position: absolute;
-        bottom: 0px;
-        font-size: 14px;
-        text-align: center;
-        display: block;
-        width: 100%;
-        height: 30px;
-        line-height: 30px;
-        color: #666;
-
-}
+    .tree-child-ul {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 15px;
+    }
+	.tree-child-ul > li{
+		 line-height:35px;
+	}
 </style>
